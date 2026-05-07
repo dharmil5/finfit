@@ -303,7 +303,7 @@ textarea.inp{resize:vertical;min-height:70px;}
       <div class="psub">Your API key connects FinFit to Claude AI. It <strong>never leaves your browser</strong> — it calls Anthropic's servers directly.</div>
       <div class="fld">
         <label class="flabel">Anthropic API Key</label>
-        <input class="inp" type="password" id="inp-key" placeholder="sk-ant-api03-..." autocomplete="off">
+        <input class="inp" type="text" id="inp-key" placeholder="sk-ant-api03-..." autocomplete="off" style="-webkit-text-security:disc;font-family:monospace;">
         <div class="fhint">Get free at <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a> — API Keys — Create Key</div>
       </div>
       <div class="fld">
@@ -658,16 +658,14 @@ ESCALATE: assets>50L, estate planning, NRI/FEMA, specific product purchase.`;
 // ONBOARDING
 // ═══════════════════════════════════
 function goStep(n) {
-  // Read key — handle autofill by also checking the raw value property
   const keyEl = document.getElementById('inp-key');
-  const k = (keyEl.value || keyEl.getAttribute('value') || '').trim();
-  if(k) S.apiKey = k;
   const nameEl = document.getElementById('inp-name');
-  const nm = (nameEl.value || '').trim();
-  if(nm) S.name = nm;
+  if(keyEl) S.apiKey = keyEl.value.trim();
+  if(nameEl) S.name = nameEl.value.trim() || 'there';
 
   if(n >= 2 && !S.apiKey) {
-    alert('Please enter your Anthropic API key to continue.\n\nIf you have already typed it, click inside the key field first, then click Continue.');
+    alert('Please type your Anthropic API key and click Continue.');
+    keyEl && keyEl.focus();
     return;
   }
 
@@ -1149,34 +1147,7 @@ function newChat(){
   addBotMsg('New chat started. What would you like to work on today?',['Old vs New regime','Salary optimisation','Investment review']);
 }
 
-// On page load — sync any autofilled values immediately
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    const keyEl = document.getElementById('inp-key');
-    if(keyEl && keyEl.value.trim()) S.apiKey = keyEl.value.trim();
-  }, 500);
-});
-
-// Sync key whenever user interacts with the page (catches autofill)
-document.addEventListener('click', function() {
-  const keyEl = document.getElementById('inp-key');
-  if(keyEl && keyEl.value.trim()) S.apiKey = keyEl.value.trim();
-});
-
-// Also sync on input change
-document.addEventListener('DOMContentLoaded', function() {
-  const keyEl = document.getElementById('inp-key');
-  if(keyEl) {
-    keyEl.addEventListener('change', function() { if(this.value.trim()) S.apiKey = this.value.trim(); });
-    keyEl.addEventListener('input', function() { if(this.value.trim()) S.apiKey = this.value.trim(); });
-    // Check for autofill every 300ms for first 3 seconds
-    let checks = 0;
-    const interval = setInterval(function() {
-      if(keyEl.value.trim()) { S.apiKey = keyEl.value.trim(); }
-      if(++checks >= 10) clearInterval(interval);
-    }, 300);
-  }
-});
+// Key is read directly in goStep()
 </script>
 </body>
 </html>
