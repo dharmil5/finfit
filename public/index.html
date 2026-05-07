@@ -1083,29 +1083,22 @@ async function callAPI(text, ic) {
   removeTyping(); S.busy=false; document.getElementById('send-btn').disabled=false;
 
   if(!resp||!resp.ok){
-    let msg=`API ${resp?.status||'?'}: ${data?.error?.message||'unknown'}`;
-    if(resp?.status===401) msg='Invalid API key. Check at <a href="https://console.anthropic.com" target="_blank" style="color:var(--red)">console.anthropic.com</a>';
-    if(resp?.status===429) msg='Rate limit reached. Please wait 1 minute and try again. This happens when messages are sent too quickly.';
+    let msg='API '+(resp?.status||'?')+': '+(data?.error?.message||'unknown');
+    if(resp?.status===401) msg='Invalid API key. Check at console.anthropic.com';
+    if(resp?.status===429) msg='Rate limit reached. Please wait 1 minute and try again.';
     showError(msg, resp?.status!==401); return;
   }
 
-    const reply=data.content?.[0]?.text||'Something went wrong. Please try again.';
-    const rc=hasImg&&ic?[{type:ic.startsWith('data:application/pdf')?'document':'image',source:{type:'base64',media_type:ic.startsWith('data:image/png')?'image/png':ic.startsWith('data:application/pdf')?'application/pdf':'image/jpeg',data:ic.split(',')[1]}},{type:'text',text:text||''}]:text;
-    S.msgs.push({role:'user',content:rc});
-    S.msgs.push({role:'assistant',content:reply});
-
-    S.score=Math.min(850,S.score+(p!=='all'?8:5));
-    if(p!=='all') S.pillarAct[p]=(S.pillarAct[p]||0)+1;
-    document.getElementById('score-num').textContent=S.score;
-    updateKundliUI();
-
-    const fu={tax:['HRA calculate karo','80C gap check'],salary:['Salary restructure plan','NPS benefit'],invest:['XIRR check karna hai','Direct fund switch'],insurance:['Coverage gap check','Term sizing'],debt:['EMI ratio check','Prepayment decision'],goals:['Emergency fund plan','Retirement number'],emergency:['Liquid fund choice','EPF withdrawal steps'],behaviour:['50-50 rule implement','Goal set karo']};
-    addBotMsg(reply,(fu[p]||['Follow-up question','Another topic']).slice(0,2));
-
-  } catch(err) {
-    removeTyping(); S.busy=false; document.getElementById('send-btn').disabled=false;
-    showError(err.message||'Network error. Check your internet.',true);
-  }
+  const reply=data.content?.[0]?.text||'Something went wrong. Please try again.';
+  const rc=hasImg&&ic?[{type:ic.startsWith('data:application/pdf')?'document':'image',source:{type:'base64',media_type:ic.startsWith('data:image/png')?'image/png':ic.startsWith('data:application/pdf')?'application/pdf':'image/jpeg',data:ic.split(',')[1]}},{type:'text',text:text||''}]:text;
+  S.msgs.push({role:'user',content:rc});
+  S.msgs.push({role:'assistant',content:reply});
+  S.score=Math.min(850,S.score+(p!=='all'?8:5));
+  if(p!=='all') S.pillarAct[p]=(S.pillarAct[p]||0)+1;
+  document.getElementById('score-num').textContent=S.score;
+  updateKundliUI();
+  const fu={tax:['HRA calculate karo','80C gap check'],salary:['Salary restructure plan','NPS benefit'],invest:['XIRR check karna hai','Direct fund switch'],insurance:['Coverage gap check','Term sizing'],debt:['EMI ratio check','Prepayment decision'],goals:['Emergency fund plan','Retirement number'],emergency:['Liquid fund choice','EPF withdrawal steps'],behaviour:['50-50 rule implement','Goal set karo']};
+  addBotMsg(reply,(fu[p]||['Follow-up question','Another topic']).slice(0,2));
 }
 
 // Kundli UI
