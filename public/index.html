@@ -310,7 +310,7 @@ textarea.inp{resize:vertical;min-height:70px;}
         <label class="flabel">Your name <span class="fopt">(optional)</span></label>
         <input class="inp" type="text" id="inp-name" placeholder="e.g. Dharmil">
       </div>
-      <button class="btn btn-p" onclick="goStep(2)">Continue</button>
+      <button class="btn btn-p" id="btn-continue" onclick="goStep(2)">Continue</button>
     </div>
 
     <!-- PANE 2 -->
@@ -658,14 +658,16 @@ ESCALATE: assets>50L, estate planning, NRI/FEMA, specific product purchase.`;
 // ONBOARDING
 // ═══════════════════════════════════
 function goStep(n) {
-  // Read key
-  const k = document.getElementById('inp-key').value.trim();
+  // Read key — handle autofill by also checking the raw value property
+  const keyEl = document.getElementById('inp-key');
+  const k = (keyEl.value || keyEl.getAttribute('value') || '').trim();
   if(k) S.apiKey = k;
-  const nm = document.getElementById('inp-name').value.trim();
+  const nameEl = document.getElementById('inp-name');
+  const nm = (nameEl.value || '').trim();
   if(nm) S.name = nm;
 
   if(n >= 2 && !S.apiKey) {
-    alert('Please enter your Anthropic API key to continue.');
+    alert('Please enter your Anthropic API key to continue.\n\nIf you have already typed it, click inside the key field first, then click Continue.');
     return;
   }
 
@@ -1146,7 +1148,35 @@ function newChat(){
   document.getElementById('score-num').textContent='0';
   addBotMsg('New chat started. What would you like to work on today?',['Old vs New regime','Salary optimisation','Investment review']);
 }
+
+// On page load — sync any autofilled values immediately
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    const keyEl = document.getElementById('inp-key');
+    if(keyEl && keyEl.value.trim()) S.apiKey = keyEl.value.trim();
+  }, 500);
+});
+
+// Sync key whenever user interacts with the page (catches autofill)
+document.addEventListener('click', function() {
+  const keyEl = document.getElementById('inp-key');
+  if(keyEl && keyEl.value.trim()) S.apiKey = keyEl.value.trim();
+});
+
+// Also sync on input change
+document.addEventListener('DOMContentLoaded', function() {
+  const keyEl = document.getElementById('inp-key');
+  if(keyEl) {
+    keyEl.addEventListener('change', function() { if(this.value.trim()) S.apiKey = this.value.trim(); });
+    keyEl.addEventListener('input', function() { if(this.value.trim()) S.apiKey = this.value.trim(); });
+    // Check for autofill every 300ms for first 3 seconds
+    let checks = 0;
+    const interval = setInterval(function() {
+      if(keyEl.value.trim()) { S.apiKey = keyEl.value.trim(); }
+      if(++checks >= 10) clearInterval(interval);
+    }, 300);
+  }
+});
 </script>
 </body>
 </html>
-
