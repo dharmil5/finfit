@@ -1,0 +1,15 @@
+{
+  "name": "finfit",
+  "version": "1.0.0",
+  "description": "FinFit — India's Financial Wellness Coach",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
